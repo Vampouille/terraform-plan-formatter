@@ -12,7 +12,7 @@ extract_diff_re = re.compile('([^:]+):\s+"(.*)"\s+=>\s+"(.*)"$')
 
 convert_diff_type = {
         '+': 'Adding',
-        '~': 'Modyfing',
+        '~': 'Modifying',
         '-': 'Deleting'}
 
 class State(Enum):
