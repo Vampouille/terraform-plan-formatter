@@ -15,9 +15,9 @@ diff_count = 0
 
 stack_list_item_re = re.compile('^rancher_stack\.([a-zA-Z-]+):\sRefreshing\sstate...')
 stack_diff_header_re = re.compile('^(~|\+|-)\srancher_stack\.([a-zA-Z-]+)$')
-catalog_env_diff_re = re.compile('^\s*environment\.([\w%_-]+):\s*"([^"]*)"\s*=>\s*"([^"]*)"$')
-catalog_id_diff_re = re.compile('^\s*catalog_id:\s*"([^"]*)"\s*=>\s*"([^"]*)"$')
-compose_diff_re = re.compile('^\s*(rancher_compose|docker_compose):\s*"([^"]*)"\s*=>\s*"([^"]*)"$')
+catalog_env_diff_re = re.compile('^\s*environment\.([\w%_-]+):\s*"([^"]*)"(\s*=>\s*"([^"]*)")?$')
+catalog_id_diff_re = re.compile('^\s*catalog_id:\s*"([^"]*)"(\s*=>\s*"([^"]*)")?$')
+compose_diff_re = re.compile('^\s*(rancher_compose|docker_compose):\s*"([^"]*)"\s*=>\s*"(.*)"$')
 extract_diff_re = re.compile('([^:]+):\s+"(.*)"\s+=>\s+"(.*)"$')
 
 convert_diff_type = {
@@ -48,7 +48,7 @@ def parse_compose_diff_line(line, diff_type, stack_name):
     line = line.strip()
     if diff_type != '~':
         return
-    # _print("Parsing : %s" % line)
+    #_print("Parsing : %s" % line)
     matches = extract_diff_re.match(line)
     item = matches.group(1)
     diff1 = matches.group(2).replace('\\n', '\n').splitlines()
@@ -69,7 +69,7 @@ def parse_compose_diff_line(line, diff_type, stack_name):
     diff_count = diff_count + max(0, local_diff_count - 3)
 
 def parse_catalog_env_diff_line(line, diff_type, stack_name):
-    #_print("Catalog env line %s" % line)
+    #print("Catalog env line %s" % line)
     matches = catalog_env_diff_re.match(line)
     var = matches.group(1)
     old_value = matches.group(2)
@@ -99,7 +99,7 @@ state = State.BEFORE_STACK_LIST
 for line in sys.stdin:
     # remove trailling new line
     line = line.strip("\n")
-    # _print("%s : %s" % (state, line))
+    #_print("IN  %s : %s" % (state, line))
 
     if state == State.BEFORE_STACK_LIST:
         if stack_list_item_re.match(line) is not None:
@@ -127,6 +127,7 @@ for line in sys.stdin:
             if not args.quiet:
                 _print()
             state = State.AFTER_STACK_LIST
+    #_print("OUT %s : %s" % (state, line))
 
 if not args.quiet:
     print("Total diff count : %s" % diff_count)
